@@ -1,0 +1,10 @@
+{
+  "expo": {
+    "scheme": "acme",
+    "web": {
+      "bundler": "metro"
+    },
+    "name": "soundUNder_ma",
+    "slug": "soundUNder_ma"
+  }
+}
