@@ -72,12 +72,13 @@ const styles = StyleSheet.create({
         // marginTop: 200,
     },
     questionText: {
-        color: '#fefefe',
+        color: '#e94832',
         fontSize: 16,
         fontWeight: 'normal',
         textAlign: 'center',
         textShadowColor: 'rgba(0, 0, 0, 0.75)',
         textShadowOffset: { width: -1, height: 1 },
+        marginBottom: 40,
     },
 })
 
