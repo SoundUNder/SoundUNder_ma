@@ -12,9 +12,12 @@ import { useFormik } from 'formik'
 import ButtonForm from '../../components/ButtonForm'
 import TextInputForm from '../../components/TextInputForm'
 import * as Yup from 'yup'
-import React, { useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useMutation } from '@apollo/client'
 import { SIGNIN } from '../../services/auth/mutationAuth'
+import AsyncStorage, {
+  useAsyncStorage,
+} from '@react-native-async-storage/async-storage'
 
 const Signin = () => {
   // * This is how routes are done! create a folder that matches the route and place
@@ -23,6 +26,37 @@ const Signin = () => {
   // * to be an exact match of the folder's name
 
   const router = useRouter()
+  const [value, setValue] = useState('value')
+
+  const { getItem, setItem } = useAsyncStorage('@storage_key')
+
+  const readItemFromStorage = async () => {
+    const item = await getItem()
+    setValue(item)
+  }
+
+  const writeItemToStorage = async (newValue) => {
+    if (newValue) {
+      await setItem(newValue)
+      setValue(newValue)
+    }
+  }
+
+  // // * This is how to use AsyncStorage
+  // setStringValue = async (value) => {
+  //   try {
+  //     await AsyncStorage.setItem('token', value)
+  //   } catch (e) {
+  //     // save error
+  //   }
+
+  //   console.log('Done.')
+  // }
+
+  // useEffect(() => {
+  //   readItemFromStorage()
+  // }, [])
+
   const password = useRef(null)
   const [loginUser, { data, loading }] = useMutation(SIGNIN)
 
@@ -51,10 +85,11 @@ const Signin = () => {
         // alert(`email: ${values.email} password: ${values.password}`)
       },
     })
-  console.log('====================================')
-  console.log('data', data)
-  console.log('====================================')
-  // alert('data', data)
+
+  if (!loading && data && data.loginUser.token) {
+    writeItemToStorage(data?.loginUser?.token)
+    router.push('/dashboard')
+  }
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
