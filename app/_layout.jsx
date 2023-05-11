@@ -8,21 +8,10 @@ import {
 import { setContext } from '@apollo/client/link/context'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
-getMyStringValue = async () => {
-  try {
-    return await AsyncStorage.getItem('@storage_key')
-  } catch (e) {
-    // read error
-  }
-
-  console.log('Done.')
-}
-
 const Layout = () => {
   const authLink = setContext(async (_, { headers }) => {
     // get the authentication token from local storage if it exists
-    // const token = getMyStringValue()
-    const token = await AsyncStorage.getItem('@storage_key')
+    const token = await AsyncStorage.getItem('@token')
     // return the headers to the context so httpLink can read them
     return {
       headers: {

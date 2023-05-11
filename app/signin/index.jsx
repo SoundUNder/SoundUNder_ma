@@ -25,40 +25,23 @@ const Signin = () => {
   // * For an example of dynamic routing see player, and be careful: the route name needs
   // * to be an exact match of the folder's name
 
+  const password = useRef(null)
   const router = useRouter()
-  const [value, setValue] = useState('value')
-
-  const { getItem, setItem } = useAsyncStorage('@storage_key')
+  const [token, setToken] = useState('Token not set')
+  const [loginUser, { data, loading }] = useMutation(SIGNIN)
+  const { getItem, setItem } = useAsyncStorage('@token')
 
   const readItemFromStorage = async () => {
     const item = await getItem()
     setValue(item)
   }
 
-  const writeItemToStorage = async (newValue) => {
-    if (newValue) {
-      await setItem(newValue)
-      setValue(newValue)
+  const writeItemToStorage = async (token) => {
+    if (token) {
+      await setItem(token)
+      setToken(token)
     }
   }
-
-  // // * This is how to use AsyncStorage
-  // setStringValue = async (value) => {
-  //   try {
-  //     await AsyncStorage.setItem('token', value)
-  //   } catch (e) {
-  //     // save error
-  //   }
-
-  //   console.log('Done.')
-  // }
-
-  // useEffect(() => {
-  //   readItemFromStorage()
-  // }, [])
-
-  const password = useRef(null)
-  const [loginUser, { data, loading }] = useMutation(SIGNIN)
 
   const LoginSchema = Yup.object().shape({
     email: Yup.string().email('Invalid email').required('Required'),
@@ -82,13 +65,14 @@ const Signin = () => {
             password: values.password,
           },
         })
-        // alert(`email: ${values.email} password: ${values.password}`)
       },
     })
 
   if (!loading && data && data.loginUser.token) {
     writeItemToStorage(data?.loginUser?.token)
-    router.push('/dashboard')
+    setTimeout(() => {
+      router.push('/dashboard')
+    }, 500)
   }
 
   return (
@@ -138,7 +122,7 @@ const Signin = () => {
             />
           </View>
           <View style={styles.buttonForm}>
-            <ButtonForm label={'Login'} onPress={handleSubmit} />
+            <ButtonForm label={'Login'} onPress={() => handleSubmit()} />
           </View>
           <View>
             <TouchableOpacity onPress={() => router.push('/restorePassword')}>
