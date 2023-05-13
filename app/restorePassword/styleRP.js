@@ -14,7 +14,7 @@ const styles = StyleSheet.create({
         resizeMode: 'cover',
         alignItems: 'center',
         gap: 20,
-        // justifyContent: 'center',
+        justifyContent: 'space-around',
         marginTop: 0,
     },
     image: {
@@ -90,6 +90,7 @@ const styles = StyleSheet.create({
     },
     inputForm: {
         width: 300,
+        height: 50,
         alignItems: 'center',
         gap: 20,
     },

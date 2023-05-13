@@ -46,7 +46,9 @@ const Home = () => {
               <Text style={styles.buttonText}>Sign In</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              onPress={() => router.push('/signupWithGoogle')}
+              onPress={() =>
+                router.push('http://192.168.5.110:3000/auth/oauth/v2/google')
+              }
               style={styles.button}
             >
               <Text style={styles.buttonText}>Continue whit Google</Text>

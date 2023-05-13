@@ -17,9 +17,9 @@ const styles = StyleSheet.create({
     body: {
         width: '100%',
         height: '100%',
+
         backgroundColor: '#000000a0',
         alignItems: 'center',
-        textAlign: 'center',
         justifyContent: 'space-between',
         paddingHorizontal: 30,
         gap: 10,
@@ -43,6 +43,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
     buttonForm: {
+        alignItems: 'center',
         width: 300,
         marginTop: 20,
     },
@@ -68,21 +69,22 @@ const styles = StyleSheet.create({
         textShadowOffset: { width: -1, height: 1 },
     },
     questionText: {
-        color: '#fefefe',
+        color: '#e94832',
         fontSize: 16,
         fontWeight: 'normal',
         textAlign: 'center',
         textShadowColor: 'rgba(0, 0, 0, 0.75)',
         textShadowOffset: { width: -1, height: 1 },
+        marginBottom: 40,
     },
     pickerGender: {
-        fontSize: 10,
-        height: 50,
         width: 300,
-        marginTop: -9,
+        height: 48,
+        borderRadius: 8,
+        backgroundColor: '#1a1a1a',
+        borderColor: '#fefefe',
         color: '#fefefe',
-        borderWidth: 1,
-        borderColor: "#666",
+        fontSize: 16,
     },
     calendar: {
         width: 300,
@@ -93,6 +95,7 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
         fontSize: 16,
     },
+
 })
 
 export default styles

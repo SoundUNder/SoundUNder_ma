@@ -61,9 +61,9 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
     },
     buttonForm: {
-        backgroundColor: '#fefefe',
-        borderRadius: 50,
-        // marginTop: 25,
+        alignItems: 'center',
+        width: 300,
+        marginTop: 20,
     },
     links: {
         flexDirection: 'row',
