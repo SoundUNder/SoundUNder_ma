@@ -84,8 +84,8 @@ const Signup = () => {
       .min(2, 'Too Short!')
       .max(50, 'Too Long!')
       .required('Required'),
-    // birthDate: Yup.string().required('Required'),
-    // gender: Yup.string().required('Required'),
+    birthDate: Yup.date().required('Required'),
+    gender: Yup.string().required('Required'),
   })
 
   const { handleChange, handleSubmit, handleBlur, values, errors, touched } =
