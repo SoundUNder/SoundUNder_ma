@@ -36,11 +36,6 @@ const styles = StyleSheet.create({
     },
     textInput: {
         width: '100%',
-        backgroundColor: '#1a1a1a',
-        borderRadius: 50,
-        paddingHorizontal: 15,
-        paddingVertical: 10,
-        fontSize: 16,
     },
     buttonForm: {
         alignItems: 'center',
