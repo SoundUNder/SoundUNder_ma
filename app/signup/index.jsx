@@ -18,12 +18,15 @@ import { useFormik } from 'formik'
 import * as Yup from 'yup'
 import dayjs from 'dayjs'
 import DateTimePicker from '@react-native-community/datetimepicker'
+import { Picker } from '@react-native-picker/picker'
+import { set } from 'react-native-reanimated'
 
 const Signup = () => {
   const router = useRouter()
   const password = useRef(null)
   const username = useRef(null)
   const birthDate = useRef(null)
+  const gender = useRef(null)
 
   /** date */
   const [dateOfBirth, setDateOfBirth] = useState('')
@@ -59,6 +62,18 @@ const Signup = () => {
     return `${year}-${month}-${day}`
   }
 
+  /** Gender */
+  const [showPickerGender, setShowPickerGender] = useState(false)
+  const [genderUser, setGenderUser] = useState('')
+  const togglePickerGender = () => {
+    setShowPickerGender(!showPickerGender)
+  }
+
+  const selectGender = (valueGender) => {
+    setGenderUser(valueGender)
+    togglePickerGender()
+  }
+
   const RegisterSchema = Yup.object().shape({
     email: Yup.string().email('Invalid email').required('Required'),
     password: Yup.string()
@@ -69,7 +84,8 @@ const Signup = () => {
       .min(2, 'Too Short!')
       .max(50, 'Too Long!')
       .required('Required'),
-    birthDate: Yup.string().required('Required'),
+    // birthDate: Yup.string().required('Required'),
+    // gender: Yup.string().required('Required'),
   })
 
   const { handleChange, handleSubmit, handleBlur, values, errors, touched } =
@@ -83,9 +99,18 @@ const Signup = () => {
         gender: '',
       },
       onSubmit: (values) => {
-        values.birthDate = dateOfBirth
+        values.birthDate = dateOfBirth.toString()
+        values.gender = genderUser
+        console.log('====================================')
+        console.log(values)
+        console.log('====================================')
       },
     })
+
+  console.log('====================================')
+  console.log(dateOfBirth)
+  console.log(genderUser)
+  console.log('====================================')
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -164,11 +189,92 @@ const Signup = () => {
                   returnKeyType='next'
                   returnKeyLabel='next'
                   placeholderTextColor='#d4c5c584'
-                  value={dateOfBirth}
-                  onChangeText={handleChange('birthDate') && setDateOfBirth}
+                  value={dateOfBirth.toString()}
+                  onChangeText={handleChange('birthDate')}
                   onBlur={handleBlur('birthDate')}
                   error={errors.birthDate}
                   touched={touched.birthDate}
+                  onSubmitEditing={() => console.log('date', birthDate)}
+                />
+              </Pressable>
+            )}
+            {showPickerGender && (
+              <View style={styles.modalGender}>
+                <View style={styles.viewGender}>
+                  <Pressable
+                    style={styles.areaFieldGender}
+                    onPress={togglePickerGender}
+                  >
+                    <Text
+                      style={styles.textGender}
+                      onPress={() => selectGender('Male')}
+                    >
+                      Male
+                    </Text>
+                  </Pressable>
+                  <Pressable
+                    style={styles.areaFieldGender}
+                    onPress={togglePickerGender}
+                  >
+                    <Text
+                      style={styles.textGender}
+                      onPress={() => selectGender('Female')}
+                    >
+                      Female
+                    </Text>
+                  </Pressable>
+                  <Pressable
+                    style={styles.areaFieldGender}
+                    onPress={togglePickerGender}
+                  >
+                    <Text
+                      style={styles.textGender}
+                      onPress={() => selectGender('No binary')}
+                    >
+                      No binary
+                    </Text>
+                  </Pressable>
+                  <Pressable
+                    style={styles.areaFieldGender}
+                    onPress={togglePickerGender}
+                  >
+                    <Text
+                      style={styles.textGender}
+                      onPress={() => selectGender('Other')}
+                    >
+                      Other
+                    </Text>
+                  </Pressable>
+                  <Pressable
+                    style={styles.areaFieldGender}
+                    onPress={togglePickerGender}
+                  >
+                    <Text
+                      style={styles.textGender}
+                      onPress={() => selectGender(`Prefer don't say`)}
+                    >
+                      Prefer don't say
+                    </Text>
+                  </Pressable>
+                </View>
+              </View>
+            )}
+            {!showPickerGender && (
+              <Pressable onPress={togglePickerGender} style={styles.textInput}>
+                <TextInputForm
+                  ref={gender}
+                  editable={false}
+                  icon={'user'}
+                  placeholder='Enter your gender'
+                  keyboardAppearance='dark'
+                  returnKeyType='go'
+                  returnKeyLabel='go'
+                  placeholderTextColor='#d4c5c584'
+                  value={genderUser}
+                  onChangeText={handleChange('gender')}
+                  onBlur={handleBlur('gender')}
+                  error={errors.gender}
+                  touched={touched.gender}
                   onSubmitEditing={() => handleSubmit()}
                 />
               </Pressable>
@@ -178,14 +284,6 @@ const Signup = () => {
               <ButtonForm label={'Register'} onPress={() => handleSubmit()} />
             </View>
             <Text style={styles.questionText}>¿Ya tienes cuenta?</Text>
-          </View>
-          <View style={styles.links}>
-            <TouchableOpacity onPress={() => router.push('/signin')}>
-              <Text style={styles.textLink}>Ingresa</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => router.back()}>
-              <Text style={styles.textLink}>Regresar</Text>
-            </TouchableOpacity>
           </View>
         </View>
       </ImageBackground>
