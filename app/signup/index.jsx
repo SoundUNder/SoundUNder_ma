@@ -3,8 +3,6 @@ import {
   Text,
   SafeAreaView,
   ImageBackground,
-  Button,
-  TouchableOpacity,
   Pressable,
   Platform,
 } from 'react-native'
@@ -16,17 +14,32 @@ import TextInputForm from '../../components/TextInputForm'
 import ButtonForm from '../../components/ButtonForm'
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
-import dayjs from 'dayjs'
 import DateTimePicker from '@react-native-community/datetimepicker'
-import { Picker } from '@react-native-picker/picker'
-import { set } from 'react-native-reanimated'
+import { SIGNUP } from '../../services/auth/mutationAuth'
+import { useMutation } from '@apollo/client'
 
 const Signup = () => {
   const router = useRouter()
   const password = useRef(null)
   const username = useRef(null)
-  const birthDate = useRef(null)
+  const birthdate = useRef(null)
   const gender = useRef(null)
+
+  /** Mutation */
+  const [registerUser, { data, loading, error }] = useMutation(SIGNUP)
+
+  const writeItemToStorage = async (token) => {
+    if (token) {
+      await setItem(token)
+      setToken(token)
+    }
+  }
+
+  console.log('***************')
+  console.log(data)
+  console.log(loading)
+  console.log(error)
+  console.log('***************')
 
   /** date */
   const [dateOfBirth, setDateOfBirth] = useState('')
@@ -84,8 +97,8 @@ const Signup = () => {
       .min(2, 'Too Short!')
       .max(50, 'Too Long!')
       .required('Required'),
-    birthDate: Yup.date().required('Required'),
-    gender: Yup.string().required('Required'),
+    // birthDate: Yup.date().required('Required'),
+    // gender: Yup.string().required('Required'),
   })
 
   const { handleChange, handleSubmit, handleBlur, values, errors, touched } =
@@ -95,22 +108,40 @@ const Signup = () => {
         email: '',
         password: '',
         username: '',
-        birthDate: '',
+        birthdate: '',
         gender: '',
       },
       onSubmit: (values) => {
-        values.birthDate = dateOfBirth.toString()
-        values.gender = genderUser
-        console.log('====================================')
-        console.log(values)
-        console.log('====================================')
+        try {
+          values.birthdate = dateOfBirth
+          values.gender = genderUser
+          registerUser({
+            variables: {
+              email: values.email,
+              password: values.password,
+              username: values.username,
+              birthdate: values.birthdate,
+              gender: values.gender,
+            },
+          })
+          console.log(values)
+        } catch (error) {
+          console.error(error.message)
+        }
       },
     })
 
-  console.log('====================================')
-  console.log(dateOfBirth)
-  console.log(genderUser)
-  console.log('====================================')
+  if (!loading && data && error === undefined) {
+    try {
+      writeItemToStorage(data?.loginUser?.token)
+      setTimeout(() => {
+        router.push('/dashboard')
+      }, 500)
+      // console.log(data?.registerUser?.token)
+    } catch (error) {
+      console.error(error.message)
+    }
+  }
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -181,7 +212,7 @@ const Signup = () => {
             {!showpicker && (
               <Pressable onPress={toggleDatePicker} style={styles.textInput}>
                 <TextInputForm
-                  ref={birthDate}
+                  ref={birthdate}
                   editable={false}
                   icon={'calendar'}
                   placeholder='Enter your birthdate'
@@ -190,11 +221,11 @@ const Signup = () => {
                   returnKeyLabel='next'
                   placeholderTextColor='#d4c5c584'
                   value={dateOfBirth.toString()}
-                  onChangeText={handleChange('birthDate')}
-                  onBlur={handleBlur('birthDate')}
+                  onChangeText={handleChange('birthdate')}
+                  onBlur={handleBlur('birthdate')}
                   error={errors.birthDate}
                   touched={touched.birthDate}
-                  onSubmitEditing={() => console.log('date', birthDate)}
+                  onSubmitEditing={() => console.log('date', birthdate)}
                 />
               </Pressable>
             )}
