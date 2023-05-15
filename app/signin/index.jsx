@@ -29,16 +29,18 @@ const Signin = () => {
   const router = useRouter()
   const [token, setToken] = useState('Token not set')
   const [loginUser, { data, loading }] = useMutation(SIGNIN)
-  const { getItem, setItem } = useAsyncStorage('@token')
+  const [valueStorage, setValueStorage] = useState(null)
+  const { getItem, setItem } = useAsyncStorage('token')
 
   const readItemFromStorage = async () => {
-    const item = await getItem()
-    setValue(item)
+    const itemStorage = await getItem()
+    const item = JSON.parse(itemStorage)
+    setValueStorage(item)
   }
 
   const writeItemToStorage = async (token) => {
     if (token) {
-      await setItem(token)
+      await setItem(JSON.stringify(token))
       setToken(token)
     }
   }
@@ -68,12 +70,14 @@ const Signin = () => {
       },
     })
 
-  if (!loading && data && data.loginUser.token) {
-    writeItemToStorage(data?.loginUser?.token)
-    setTimeout(() => {
-      router.push('/dashboard')
-    }, 500)
-  }
+  useEffect(() => {
+    if (!loading && data && data.loginUser.token) {
+      writeItemToStorage(data?.loginUser?.token)
+      setTimeout(() => {
+        router.push('/dashboard')
+      }, 500)
+    }
+  }, [data])
 
   return (
     <SafeAreaView style={{ flex: 1 }}>

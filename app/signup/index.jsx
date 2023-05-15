@@ -9,7 +9,7 @@ import {
 import { Stack, useRouter } from 'expo-router'
 import background from '../../assets/background.jpg'
 import styles from './styleSignup'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import TextInputForm from '../../components/TextInputForm'
 import ButtonForm from '../../components/ButtonForm'
 import { useFormik } from 'formik'
@@ -17,6 +17,7 @@ import * as Yup from 'yup'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { SIGNUP } from '../../services/auth/mutationAuth'
 import { useMutation } from '@apollo/client'
+import { useAsyncStorage } from '@react-native-async-storage/async-storage'
 
 const Signup = () => {
   const router = useRouter()
@@ -25,21 +26,18 @@ const Signup = () => {
   const birthdate = useRef(null)
   const gender = useRef(null)
 
+  const { getItem, setItem } = useAsyncStorage('token')
+  const [token, setToken] = useState('')
+
   /** Mutation */
   const [registerUser, { data, loading, error }] = useMutation(SIGNUP)
 
   const writeItemToStorage = async (token) => {
     if (token) {
-      await setItem(token)
+      await setItem(JSON.stringify(token))
       setToken(token)
     }
   }
-
-  console.log('***************')
-  console.log(data)
-  console.log(loading)
-  console.log(error)
-  console.log('***************')
 
   /** date */
   const [dateOfBirth, setDateOfBirth] = useState('')
@@ -131,17 +129,14 @@ const Signup = () => {
       },
     })
 
-  if (!loading && data && error === undefined) {
-    try {
-      writeItemToStorage(data?.loginUser?.token)
+  useEffect(() => {
+    if (!loading && data?.registerUser?.token) {
+      writeItemToStorage(data?.registerUser?.token)
       setTimeout(() => {
         router.push('/dashboard')
       }, 500)
-      // console.log(data?.registerUser?.token)
-    } catch (error) {
-      console.error(error.message)
     }
-  }
+  }, [data])
 
   return (
     <SafeAreaView style={{ flex: 1 }}>

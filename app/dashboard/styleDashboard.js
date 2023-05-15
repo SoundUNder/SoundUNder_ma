@@ -59,6 +59,12 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginVertical: 20,
     },
+    logOutButton: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        alignSelf: 'flex-end',
+        marginVertical: 20,
+    },
 })
 
 export default styles
