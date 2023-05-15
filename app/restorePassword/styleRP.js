@@ -104,9 +104,10 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
     buttonForm: {
+        alignItems: 'center',
         width: 300,
         marginTop: 20,
-    }
+    },
 })
 
 

@@ -1,18 +1,45 @@
-import {
-  View,
-  Text,
-  Button,
-  TouchableOpacity,
-  SafeAreaView,
-} from 'react-native'
+import { View, Text, SafeAreaView } from 'react-native'
 import { Stack, useRouter } from 'expo-router'
 import { ImageBackground } from 'react-native'
 import background from '../../assets/background.jpg'
 import styles from './styleRP'
 import TextInputForm from '../../components/TextInputForm'
+import ButtonForm from '../../components/ButtonForm'
+import { RESETPASSWORD } from '../../services/auth/mutationAuth'
+import { useMutation } from '@apollo/client'
+import * as Yup from 'yup'
+import { useFormik } from 'formik'
+import { useRef } from 'react'
 
 const RestorePassword = () => {
+  const email = useRef(null)
   const router = useRouter()
+  const [restorePassword, { data, loading, error }] = useMutation(RESETPASSWORD)
+
+  const RestorePassSchema = Yup.object().shape({
+    email: Yup.string().email('Invalid email').required('Required'),
+  })
+
+  const { handleChange, handleSubmit, handleBlur, values, errors, touched } =
+    useFormik({
+      validationSchema: RestorePassSchema,
+      initialValues: {
+        email: '',
+      },
+      onSubmit: (values) => {
+        restorePassword({
+          variables: {
+            email: values.email,
+          },
+        })
+      },
+    })
+
+  if (!loading && data) {
+    if (data?.restorePassword) {
+      router.push('/signin')
+    }
+  }
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -21,6 +48,7 @@ const RestorePassword = () => {
         <Text style={styles.textTitle}>RestorePassword</Text>
         <View style={styles.inputForm}>
           <TextInputForm
+            ref={email}
             icon={'mail'}
             placeholder='Enter your email'
             autoCapitalize='none'
@@ -29,28 +57,17 @@ const RestorePassword = () => {
             keyboardAppearance='dark'
             returnKeyType='next'
             returnKeyLabel='next'
-            // style={styles.textInput}
-            // placeholderTextColor='#8d8d8d32'
             placeholderTextColor='#d4c5c584'
+            onChangeText={handleChange('email')}
+            onBlur={handleBlur('email')}
+            error={errors.email}
+            touched={touched.email}
+            onSubmitEditing={() => handleSubmit()}
           />
-          <TouchableOpacity
-            style={{
-              borderRadius: 8,
-              height: 50,
-              width: 245,
-              justifyContent: 'center',
-              alignItems: 'center',
-              backgroundColor: '#965FDD',
-              // backgroundColor: '#e94832',
-            }}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.buttonText}>Enviar</Text>
-          </TouchableOpacity>
+          <View style={styles.buttonForm}>
+            <ButtonForm label={'Send'} onPress={() => handleSubmit()} />
+          </View>
         </View>
-        {/* <TouchableOpacity onPress={() => router.back()}>
-          <Text style={styles.textLink}>Regresar</Text>
-        </TouchableOpacity> */}
       </ImageBackground>
     </SafeAreaView>
   )
