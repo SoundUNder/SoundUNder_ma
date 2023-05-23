@@ -1,17 +1,48 @@
 import { View, SafeAreaView, Text, TouchableOpacity, ActivityIndicator, FlatList } from 'react-native'
 import { Stack, useRouter } from 'expo-router'
-import { useQuery } from '@apollo/client'
+import { useLazyQuery, useQuery } from '@apollo/client'
 import { GETPLAYLISTSBYOWNER } from '../services/library/queryLibrary'
 import homeStyles from './home.styles'
+import { useEffect, useState } from 'react'
+import { useAsyncStorage } from '@react-native-async-storage/async-storage'
+import PlayLists from '../components/Playlists/Playlists'
+import Login from '../components/Login/Login'
 
 const Home = () => {
   const router = useRouter()
+  const { getItem, setItem, removeItem } = useAsyncStorage('username')
+  const [loadingUser, setLoadingUser] = useState(true)
+  const [user, setUser] = useState()
+  const [showLogin, setShowLogin] = useState(true)
 
-  const {data, loading} = useQuery(GETPLAYLISTSBYOWNER, {
-    variables: { 
-      owner: "test_user"
-    },
-  })
+  const [getPlayLists, {data, loading}] = useLazyQuery(GETPLAYLISTSBYOWNER)
+
+  // try to get token on first load
+  useEffect(() => {
+    getItem().then(result => {
+      setLoadingUser(false)
+      
+      if (result) {
+        setUser(result)
+        getPlayLists({
+          variables: { 
+            owner: result
+          },
+        })
+        setShowLogin(false)
+      }
+      
+    })
+  }, [])
+
+  const logOut = () => {
+    removeItem()
+    setShowLogin(true)
+  }
+
+  const hideLogin = () => {
+    setShowLogin(false)
+  }
 
   return (
     <SafeAreaView style={homeStyles.container}>
@@ -21,79 +52,14 @@ const Home = () => {
         }}
       />
 
-      <View>
-        <Text style={homeStyles.heading}>Hola usuario!</Text>
-        <Text style={{marginBottom: 20}}>Estas son tus listas de reproducción:</Text>
-        {
-          loading 
-          ? <ActivityIndicator size='large' color={"#74CC08"} />
-          : <FlatList 
-            data={data?.getPlaylistByOwner}
-            renderItem={({ item }) => (
-              <TouchableOpacity style={homeStyles.playList} onPress={() => router.push(`/playlist/${item.id}`)}>
-                <Text>{item.name}</Text>
-              </TouchableOpacity>
-            )}
-            keyExtractor={item => item.id}
-          />
-        }
-        <TouchableOpacity
-          onPress={() => router.push('/login')}
-          style={{
-            padding: 12,
-            backgroundColor: "#7B4FB4",
-            width: 100,
-            borderRadius: 6,
-            alignSelf: "center",
-            marginTop: 12,
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <Text
-            style={{
-              color: "#ffffff"
-            }}
-          >
-            Go to login
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={() => router.push('/player/1')}
-          style={{
-            padding: 12,
-            borderWidth: 1,
-            borderColor: "#7B4FB4",
-            width: 120,
-            borderRadius: 6,
-            alignSelf: "center",
-            marginTop: 12,
-            justifyContent: "center",
-            alignItems: "center"
-          }}
-        >
-          <Text>Go to player with song ID 1</Text>
-        </TouchableOpacity>
-
-        {/* <TouchableOpacity
-          onPress={getMultipleLibraries}
-          style={{
-            padding: 12,
-            borderWidth: 1,
-            borderColor: "#7B4FB4",
-            width: 120,
-            borderRadius: 6,
-            alignSelf: "center",
-            marginTop: 12,
-            justifyContent: "center",
-            alignItems: "center"
-          }}
-        >
-          <Text>Test Libraries</Text>
-        </TouchableOpacity> */}
-      </View>
-
+      {
+        loadingUser 
+        ? <ActivityIndicator size='large' color={"#74CC08"} />
+        : showLogin
+          ? <Login hideLogin={hideLogin}/>
+          : <PlayLists data={data} user={user} loading={loading} logOut={logOut}/>
+      }
+      
     </SafeAreaView>
   )
 }
