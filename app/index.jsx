@@ -19,6 +19,10 @@ const Home = () => {
 
   // try to get token on first load
   useEffect(() => {
+    fetchData()
+  }, [])
+
+  const fetchData = () => {
     getItem().then(result => {
       setLoadingUser(false)
       
@@ -33,7 +37,7 @@ const Home = () => {
       }
       
     })
-  }, [])
+  }
 
   const logOut = () => {
     removeItem()
@@ -42,6 +46,7 @@ const Home = () => {
 
   const hideLogin = () => {
     setShowLogin(false)
+    fetchData()
   }
 
   return (

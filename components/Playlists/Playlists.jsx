@@ -20,6 +20,7 @@ const PlayLists = ({ data, loading, user, logOut }) => {
             </TouchableOpacity>
           )}
           keyExtractor={item => item.id}
+          style={{height: 470, overflow: 'scroll'}}
         />
       }
 
