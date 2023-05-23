@@ -6,7 +6,7 @@ const Layout = () => {
   const client = new ApolloClient({
     // The ip below is converted in android
     // emulator to the machine's localhost
-    uri: 'http://10.0.2.2:4000/graphql',
+    uri: 'http://34.170.117.191:4000/graphql',
     cache: new InMemoryCache()
   })
 

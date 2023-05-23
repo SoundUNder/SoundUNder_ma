@@ -10,9 +10,9 @@ playerStyles = StyleSheet.create({
     borderRadius: 9,
     backgroundColor: '#7B4FB4',
     transform: [{ translateX: totalMillis 
-      ? 330*(currentMilis/totalMillis) -9 > 312
-        ? 312
-        : 330*(currentMilis/totalMillis) -9
+      ? 290*(currentMilis/totalMillis) -9 > 272
+        ? 272
+        : 290*(currentMilis/totalMillis) -9
       : 0
     }]
   }),
@@ -31,11 +31,11 @@ playerStyles = StyleSheet.create({
     left: 0,
     width: 
       totalMillis 
-      ? 330*(currentMilis/totalMillis) < 18
+      ? 290*(currentMilis/totalMillis) < 18
         ? 18
-        : 330*(currentMilis/totalMillis) + 9 > 330
-          ? 330
-          : 330*(currentMilis/totalMillis) + 9
+        : 290*(currentMilis/totalMillis) + 18 > 290
+          ? 290
+          : 290*(currentMilis/totalMillis) + 18
       : 18,
     height: 10,
     borderRadius: 5,

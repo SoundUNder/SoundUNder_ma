@@ -1,10 +1,11 @@
-import { View, SafeAreaView, Text, TouchableOpacity } from 'react-native'
+import { View, SafeAreaView, Text, TouchableOpacity, Image } from 'react-native'
 import { Stack, useRouter, useSearchParams } from 'expo-router'
 import { useQuery } from '@apollo/client'
 import { GET_SONG_URL } from '../../services/audio/audioQueries'
 import { useEffect, useRef, useState } from 'react'
 import { Audio } from 'expo-av'
 import playerStyles from './player.styles'
+import { ICONS } from '../../assets/constants/constants'
 
 const Player = () => {
 
@@ -21,7 +22,7 @@ const Player = () => {
   // * And, the use of the apollo client's hooks are the same
   const { loading, error, data } = useQuery(GET_SONG_URL, {
     variables: { 
-      sfId: parseInt(params.songId) +1 
+      sfId: parseInt(params.songId)
     },
   })
 
@@ -125,39 +126,117 @@ const Player = () => {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <Stack.Screen />
+      <Stack.Screen 
+        options={{
+          headerTitle: 'Reproductor'
+        }}
+      />
 
       <View
         style={{
           paddingHorizontal: 30,
-          paddingTop: 60
+          paddingTop: 30
         }}
       >
-        <Text>Hello, this should be the player with song id: {params.songId}!</Text>
-
-        <TouchableOpacity
-          onPress={() => router.push('/')}
+        <View style={{
+          flexDirection: 'row',
+          alignItems: 'center'
+        }}>
+          <Text style={{
+            fontSize: 18,
+            marginRight: 10
+          }}>
+            Reproduciendo:
+          </Text>
+          <Text
+            style={{
+              color: '#472F67',
+              fontSize: 20
+            }}
+          >
+            Song - Artist
+          </Text>
+        </View>
+        
+        <View
           style={{
-            padding: 12,
-            borderWidth: 1,
-            borderColor: "#7B4FB4",
-            width: 120,
-            borderRadius: 6,
-            alignSelf: "center",
-            marginTop: 12,
-            justifyContent: "center",
-            alignItems: "center"
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginTop: 30
           }}
         >
-          <Text>Go back home</Text>
-        </TouchableOpacity>
-
-        <Text
-          style={{marginTop: 12}}
-        >
-          URL of song is: { loading ? 'Loading...' : data?.streamSong?.SF_url_bucket_processed}
-        </Text>
-
+          <Text
+            style={{
+              textAlignVertical: 'center'
+            }}
+          >{millisToMinutesAndSeconds(currentMilis)}</Text>
+          {/* slider */}
+          <View
+            style={{
+              backgroundColor: 'rgba(123, 79, 180, 0.2)',
+              width: 290,
+              marginLeft: 5,
+              alignSelf: 'center',
+              height: 10,
+              borderRadius: 5,
+              position: 'relative'
+            }}
+            onStartShouldSetResponder={evt => true}
+            onResponderGrant={({ nativeEvent }) => {
+              setMoveSlider(true)
+              thumbRef.current.setNativeProps({
+                transform: [{ translateX: nativeEvent.locationX-9 }]
+              })
+              progressBarRef.current.setNativeProps({
+                width: nativeEvent.locationX+9
+              })
+            }}
+            onResponderMove={({ nativeEvent }) => {
+              thumbRef.current.setNativeProps({
+                transform: [{ translateX: 
+                  nativeEvent.locationX-9 > 273
+                  ? 273
+                  : nativeEvent.locationX-9
+                }]
+              })
+              progressBarRef.current.setNativeProps({
+                width: nativeEvent.locationX+9 > 290
+                  ? 290
+                  : nativeEvent.locationX+9
+              })
+            }}
+            onResponderRelease={async ({ nativeEvent }) => {
+              const newMillis = nativeEvent.locationX*totalMilis/290
+              setCurrentMilis(newMillis)
+              thumbRef.current.setNativeProps({
+                transform: [{ translateX: nativeEvent.locationX -9}]
+              })
+              progressBarRef.current.setNativeProps({
+                width: nativeEvent.locationX+9
+              })
+              await soundObject.current.setPositionAsync(newMillis)
+              setMoveSlider(false)
+            }}
+          >
+            {/* thumb */}
+            <View ref={thumbRef}
+              style={
+                moveSlider 
+                ? playerStyles.progressThumb
+                : playerStyles.progressThumbResponsive(currentMilis, totalMilis)
+              }
+            />
+            {/* progress bar */}
+            <View ref={progressBarRef}
+              style={
+                moveSlider
+                ? playerStyles.progressBar
+                : playerStyles.progressBarResponsive(currentMilis, totalMilis)
+              }
+            />
+          </View>
+        </View>
+        
         <TouchableOpacity
           onPress={() => {
             if(hasEnded) {
@@ -166,92 +245,32 @@ const Player = () => {
             setShouldPlay(play => !play)
           }}
           style={{
-            padding: 12,
+            padding: 24,
             backgroundColor: "#7B4FB4",
-            width: 120,
-            borderRadius: 6,
+            width: 48,
+            height: 48,
+            borderRadius: 24,
             alignSelf: "center",
-            marginTop: 12,
+            marginTop: 5,
             justifyContent: "center",
             alignItems: "center"
           }}
         >
-          <Text
-            style={{
-              color: '#ffffff'
-            }}
-          >
-            {shouldPlay ? 'Pause' : 'Play'}
-          </Text>
-        </TouchableOpacity>
-        <Text>Current position: {millisToMinutesAndSeconds(currentMilis)}</Text>
-        {/* slider */}
-        <View
+          <Image
+          source={
+            hasEnded
+            ? ICONS.replay
+            : shouldPlay 
+              ? ICONS.pause 
+              : ICONS.play
+          }
+          resizeMode={'contain'}
           style={{
-            marginTop: 30,
-            marginBottom: 30,
-            backgroundColor: 'rgba(123, 79, 180, 0.2)',
-            width: 330,
-            marginHorizontal: 60,
-            alignSelf: 'center',
-            height: 10,
-            borderRadius: 5,
-            position: 'relative'
+            height: 24,
+            width: 24
           }}
-          onStartShouldSetResponder={evt => true}
-          onResponderGrant={({ nativeEvent }) => {
-            setMoveSlider(true)
-            thumbRef.current.setNativeProps({
-              transform: [{ translateX: nativeEvent.locationX-9 }]
-            })
-            progressBarRef.current.setNativeProps({
-              width: nativeEvent.locationX+9
-            })
-          }}
-          onResponderMove={({ nativeEvent }) => {
-            thumbRef.current.setNativeProps({
-              transform: [{ translateX: 
-                nativeEvent.locationX-9 > 313
-                ? 313
-                : nativeEvent.locationX-9
-              }]
-            })
-            progressBarRef.current.setNativeProps({
-              width: nativeEvent.locationX+9 > 330
-                ? 330
-                : nativeEvent.locationX+9
-            })
-          }}
-          onResponderRelease={async ({ nativeEvent }) => {
-            const newMillis = nativeEvent.locationX*totalMilis/330
-            setCurrentMilis(newMillis)
-            thumbRef.current.setNativeProps({
-              transform: [{ translateX: nativeEvent.locationX -9}]
-            })
-            progressBarRef.current.setNativeProps({
-              width: nativeEvent.locationX+9
-            })
-            await soundObject.current.setPositionAsync(newMillis)
-            setMoveSlider(false)
-          }}
-        >
-          {/* thumb */}
-          <View ref={thumbRef}
-            style={
-              moveSlider 
-              ? playerStyles.progressThumb
-              : playerStyles.progressThumbResponsive(currentMilis, totalMilis)
-            }
-          />
-          {/* progress bar */}
-          <View ref={progressBarRef}
-            style={
-              moveSlider
-              ? playerStyles.progressBar
-              : playerStyles.progressBarResponsive(currentMilis, totalMilis)
-            }
-          />
-        </View>
+        />
+        </TouchableOpacity>
       </View>
 
     </SafeAreaView>
